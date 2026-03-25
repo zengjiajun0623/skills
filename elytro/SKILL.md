@@ -5,23 +5,23 @@ description: >
   social recovery. Simulate before send, get user approval on risky steps, and explain outcomes in a
   fixed, user-friendly format (no raw JSON unless asked). Deferred OTP completed with otp submit.
   Use for: accounts, transfers, contract calls, email/security setup, guardian recovery. Node >= 24.
-version: 0.7.2
+version: 0.7.3
 homepage: https://elytro.com
 metadata:
   openclaw:
     requires:
       bins:
         - elytro
-      node: '>=24.0.0'
-    emoji: '🔐'
+      node: ">=24.0.0"
+    emoji: "🔐"
     homepage: https://github.com/Elytro-eth/skills
-    os: ['macos', 'windows', 'linux']
+    os: ["macos", "windows", "linux"]
     install:
       - id: npm
         kind: npm
-        package: '@elytro/cli'
-        bins: ['elytro']
-        label: 'Install Elytro CLI (npm)'
+        package: "@elytro/cli"
+        bins: ["elytro"]
+        label: "Install Elytro CLI (npm)"
 ---
 
 # Elytro CLI -- Agent Skill
