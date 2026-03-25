@@ -1,138 +1,208 @@
 ---
 name: elytro
 description: >
-  Elytro smart-account wallet CLI for agents: multi-chain ERC-4337, 2FA email OTP, spending limits.
-  Teaches agents to simulate before send, get user approval on risky steps, and explain outcomes in a
+  Elytro smart-account wallet CLI for agents: multi-chain ERC-4337, 2FA email OTP, spending limits,
+  social recovery. Simulate before send, get user approval on risky steps, and explain outcomes in a
   fixed, user-friendly format (no raw JSON unless asked). Deferred OTP completed with otp submit.
-  Use for: accounts, transfers, contract calls, email/security setup. Node >= 24.
-version: 0.6.1
+  Use for: accounts, transfers, contract calls, email/security setup, guardian recovery. Node >= 24.
+version: 0.7.1
 homepage: https://elytro.com
 metadata:
   openclaw:
     requires:
       bins:
         - elytro
-      node: ">=24.0.0"
-    emoji: "🔐"
+      node: '>=24.0.0'
+    emoji: '🔐'
     homepage: https://github.com/Elytro-eth/skills
-    os: ["macos", "windows", "linux"]
+    os: ['macos', 'windows', 'linux']
     install:
       - id: npm
         kind: npm
-        package: "@elytro/cli"
-        bins: ["elytro"]
-        label: "Install Elytro CLI (npm)"
+        package: '@elytro/cli'
+        bins: ['elytro']
+        label: 'Install Elytro CLI (npm)'
 ---
 
-# Elytro CLI — Agent Skill
+# Elytro CLI -- Agent Skill
 
-**Purpose:** Operate the Elytro smart account wallet **safely and predictably**.
+**Install:** `npm install -g @elytro/cli` (Node >= 24)
 
-**Install:** `npm install -g @elytro/cli` (Node ≥ 24)
+**Command reference and consent list:** [references/commands.md](references/commands.md)
 
-**Command reference & risk list:** [references/commands.md](references/commands.md)
-
----
-
-## How to read command output
-
-- Prefer the structured payload: **`success`**, then **`result`** (or **`error`** on failure).
-- **To the user:** translate into the fixed phrases in **User-visible outcomes** below. Offer raw JSON only if they ask.
-- On failure, use **`error.message`** and any **`error.data`** hints (e.g. `hint`, supported chains)—rephrase in plain language.
+All CLI commands return structured JSON. On error, read `error.message` and `error.data.hint` for what went wrong, and `suggestion` for what to do next. Follow those fields rather than guessing.
 
 ---
 
-## Operating rules
-
-1. **Session start:** `elytro update check` — tell the user if an update exists; do not upgrade without consent.
-2. **On-chain facts:** use `elytro query`; do not assume balances or chain state.
-3. **Risky commands:** require **explicit user OK** before running anything listed in `commands.md` → _Agent: user approval_.
-4. **OTP:** if the result indicates email verification is pending, use the **OTP pending** phrase and stop; user runs `otp submit` with the code when ready (see `commands.md`).
-5. **Chains:** 1, 10, 42161, 8453, 11155111, 11155420 · amounts in **ETH** · calldata hex with `0x`.
-6. **Before normal sends:** account **deployed**, **hook installed**, **email verified** (`security status`). Treat `--no-hook` as exceptional—only with user approval.
-7. **Automation:** pass **account alias/address** for `switch`, `tx simulate`, and `tx send` when multiple accounts exist (avoid interactive pickers).
-8. **Secrets:** never paste vault keys or API keys back into chat.
-
----
-
-## Agent Communication
-
-Keep **one line of status**, then **one line of next step** when useful. Same wording every time.
-
-| Situation                   | What you tell the user                                                                                                                                                                                       |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Success (generic)**       | **Done —** &lt;plain summary of what changed&gt;. **Next:** &lt;optional one action&gt;                                                                                                                      |
-| **Simulated (before send)** | **Preview —** Estimated max cost: &lt;from CLI&gt;. Sponsored: &lt;yes/no&gt;. Account balance: &lt;…&gt;. **Warnings:** &lt;list each, or “none”&gt;. **Please confirm** you want to send this transaction. |
-| **Transaction confirmed**   | **Sent —** &lt;amount / what&gt; to &lt;short address&gt;. **Tx:** &lt;hash&gt;. **Explorer:** &lt;link if Result had one&gt;                                                                                |
-| **OTP pending**             | **Email verification needed —** We’ve sent a code to &lt;masked email&gt;. **When you have the code:** run &lt;paste submitCommand from result&gt;                                                           |
-| **Blocked (security)**      | **Not ready —** 2FA email or hook setup is incomplete. **Next:** &lt;one concrete elytro command&gt;                                                                                                         |
-| **Failed**                  | **Couldn’t complete —** &lt;reason in plain English&gt;. **Try:** &lt;one fix&gt;                                                                                                                            |
-
-### Formats
-
-| Operation   | Format                                                                                                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tx sent     | `✅ Sent 0.05 ETH to 0xAbc…1234. Tx: 0xdef… Explorer: <url>`                                                                                                             |
-| Simulated   | Short summary from `tx simulate` **result**: include `gas.maxCost`, `sponsored` (yes/no), `balance`, and **every** `warnings[]` line; if no warnings, say so explicitly. |
-| Balance     | `💰 agent-primary: 0.482 ETH`                                                                                                                                            |
-| OTP pending | `🔐 OTP sent to <maskedEmail>. Run: elytro otp submit <id> <code>` (user must paste the code from email).                                                                |
-| Error       | `❌ <description> (code -32xxx). → <fix>` — use `error.data` from stderr when present (`hint`, `supportedChains`, etc.).                                                 |
-
-**Principles**: Lead with outcome. Surface explorer links from `result` when present. Map error codes using `references/commands.md`. Flag security gaps (`hookInstalled`, `emailVerified`, limits) before suggesting sends. Show raw JSON only if the user asks.
-
----
-
-## Account lifecycle (for advice only)
-
-`create` → `activate` → email + spending limit → **protected** (hook + verified email + limit).
-
-| Safe to send? | Human-facing check                                      |
-| :-----------: | ------------------------------------------------------- |
-|      No       | “Account not deployed yet.”                             |
-|      No       | “Account deployed but email not verified for security.” |
-|      Yes      | “Security profile looks ready for sending.”             |
-
----
-
-## First-time setup
+## Quick start
 
 ```bash
 elytro init
-elytro account create -c 11155420 -a agent-primary -e u@x.com -l 100
-elytro account activate agent-primary    # confirm with user first (deploy)
-elytro security email bind u@x.com       # then OTP flow
-elytro security spending-limit 100        # may OTP
-elytro security status                   # confirm all green for your policy
+elytro account create --chain 11155420 --alias agent-primary
+elytro account activate agent-primary
 ```
 
-Before recommending **send:** confirm deployed + security status the user expects + enough balance.
-
----
-
-## Workflows
-
-**Every send**
-
-1. `tx simulate` — same account, same `--tx` lines, same sponsor flags as the planned send.
-2. Reply using **Preview —** row above; wait for **explicit yes**.
-3. `tx send` with the same arguments.
-
-**Batch:** same number and order of `--tx` on simulate and send.
-
-**Swaps / contract calls:** obtain calldata off-chain, then same simulate → confirm → send.
-
-**Deferred OTP** (email bind, spending-limit, tx send when limit exceeded, 2fa uninstall)
+Recommended security setup after activation:
 
 ```bash
-elytro security email bind u@x.com
-# Parse result.otpPending.id, result.otpPending.submitCommand
-# User checks email → elytro otp submit <id> <code>
+elytro security email bind user@example.com
+elytro security spending-limit 100
+elytro security status
 ```
 
+## Daily use
+
+```bash
+elytro query chain
+elytro query balance
+```
+
+Always simulate before sending, with the same account and `--tx` arguments:
+
+```bash
+elytro tx simulate agent-primary --tx "to:0xRecipient,value:0.1"
+# show the preview to the user, wait for explicit approval
+elytro tx send agent-primary --tx "to:0xRecipient,value:0.1"
+```
+
+For batch calls, repeat `--tx` in the same order for both `simulate` and `send`.
+
+## OTP flow
+
+Some commands pause for email verification and return an `otpPending` object. Only the user should provide the code. The agent runs `elytro otp submit <id> <6-digit-code>` on their behalf -- do not ask the user to run CLI commands for OTP. Use `elytro otp list` to see pending verifications.
+
+## x402 payments(Beta)
+
+> It's a beta feature. Ask user's permission to proceed.
+
+Elytro handles HTTP 402 paywalls automatically. Two payment paths exist: ERC-7710 delegations (preferred, requires setup) and EIP-3009 (USDC auto-sign, zero setup).
+
+### Delegation lifecycle
+
+Store a delegation provided by the API server:
+
+```bash
+elytro delegation add \
+  --manager 0xDelegationManager --token 0xUSDC \
+  --payee 0xMerchant --amount 1000000 \
+  --permission 0xabc123... \
+  --verify          # optional: simulate on-chain before storing
+```
+
+Before relying on a delegation, verify it is still valid:
+
+```bash
+elytro delegation verify <id>           # single check: expiry + balance + on-chain simulation
+elytro delegation sync --prune          # batch: verify all, remove expired
+```
+
+Renew before expiry (pass the new permission context from the server):
+
+```bash
+elytro delegation renew <id> --expires-at 2026-04-01T00:00:00Z --permission 0xnew... --remove-old
+```
+
+Revoke when no longer needed:
+
+```bash
+elytro delegation revoke <id> --calldata 0x...   # on-chain revoke + local remove
+elytro delegation remove <id>                     # local remove only (no on-chain)
+```
+
+Other management: `delegation list`, `delegation show <id>`.
+
+### Making paid requests
+
+Always dry-run first so the user can see the price:
+
+```bash
+elytro request --dry-run <url>
+```
+
+Then pay (after user approval):
+
+```bash
+elytro request <url> [--method POST --json '{"topic":"defi"}']
+```
+
+If the server offers ERC-7710, the CLI matches a stored delegation automatically. If only EIP-3009 (USDC), Elytro auto-signs with no delegation needed.
+
+Full workflow and troubleshooting: [docs/x402.md](docs/x402.md)
+
+## Social recovery
+
+Social recovery lets users designate guardians who can collectively restore wallet access. The CLI handles guardian management, backup, and recovery initiation. Guardian signing and on-chain execution happen in the external Recovery App at `https://recovery.elytro.com/`.
+
+```bash
+# Set guardians (on-chain transaction, requires user approval)
+elytro recovery contacts set 0xAlice,0xBob,0xCarol --threshold 2
+# Options: --label "0xAlice=Alice,0xBob=Bob"  --privacy  --sponsor
+
+# Query / clear guardians
+elytro recovery contacts list
+elytro recovery contacts clear
+
+# Backup and restore guardian info offline
+elytro recovery backup export --output guardians.json
+elytro recovery backup import guardians.json
+
+# Initiate recovery (--chain is required)
+elytro recovery initiate 0xWalletToRecover --chain 11155420
+# Returns a recoveryUrl -- tell the user to share it with guardians
+
+# Check recovery progress
+elytro recovery status
+```
+
+When `recovery initiate` succeeds, present the `recoveryUrl` prominently and tell the user to share it with their guardians so they can approve in the Recovery App.
+
 ---
 
-## When something goes wrong
+## Approval-required commands
 
-Use the human’s language first; see **Error recovery (human)** in [references/commands.md](references/commands.md) for uniform **Try:** lines.
+Get explicit user confirmation before running any command listed under "Agent: user approval before running" in [references/commands.md](references/commands.md). This includes all money movement, security changes, recovery writes, delegation revocation, and OTP submission.
 
 ---
+
+## How to explain results
+
+Do not show raw JSON unless the user asks. Translate CLI output faithfully: preserve exact identifiers (alias, address, chain, tx hash, userOp hash, OTP id), include all warnings, and copy any next-step commands exactly. Never claim a transaction is confirmed unless the CLI says so.
+
+Use these output shapes:
+
+**Success:** `Done: <what changed>.` Optionally: `Next: <most useful next step>.`
+
+**Query/status:** `Status: <plain-language summary>.` Then one short line with the most relevant facts.
+
+**Transaction preview:**
+`Preview: <transaction type>.`
+`Cost: <estimated cost>. Sponsored: <yes/no>.`
+`Warnings: <every warning, or "none">.`
+`Please confirm if you want me to send it.`
+
+**Transaction sent:** `Done: transaction confirmed for <account>.` with `Tx: <hash>` and `Explorer: <url>` if present. If only submitted (not confirmed): use `UserOp: <hash>` instead.
+
+**OTP pending:**
+`Action needed: email verification is required to continue.`
+`Code sent to: <maskedEmail>.`
+`Please send me the 6-digit code and I'll complete it for you.`
+
+**Error:** `Couldn't complete: <reason from error.message>.` `Try: <hint from error.data.hint or suggestion>.`
+
+**Lists:** `Found <n> item(s).` Then one short line per item with the most relevant fields.
+
+---
+
+## Common commands
+
+```bash
+elytro account list
+elytro account info agent-primary
+elytro account switch agent-primary
+elytro query tx <hash>
+elytro security status
+elytro recovery contacts list
+elytro recovery status
+elytro config show
+elytro update check
+```
