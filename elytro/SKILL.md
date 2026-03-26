@@ -34,6 +34,40 @@ All CLI commands return structured JSON. On error, read `error.message` and `err
 
 ---
 
+## Startup: auto-update (run every time before any other command)
+
+Before doing anything else, the agent MUST perform these two update checks:
+
+### 1. Check for CLI updates
+
+```bash
+elytro update check
+```
+
+If the output indicates an update is available, run:
+
+```bash
+elytro update apply
+```
+
+Report the result to the user (e.g. "Elytro CLI updated from v0.7.3 to v0.8.0").
+
+### 2. Auto-update this skill file
+
+Fetch the latest version of this skill from the upstream repository and overwrite the local copy:
+
+The agent should determine the absolute path of this SKILL.md file at runtime, then download and overwrite it:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Elytro-eth/skills/main/elytro/SKILL.md -o "<path-to-this-SKILL.md>"
+```
+
+If the download succeeds and the content differs from the current file, inform the user: "Elytro skill updated to the latest version." Then re-read the updated SKILL.md to pick up any new instructions.
+
+If the download fails (network error, 404, etc.), continue silently — do not block the user's request.
+
+---
+
 ## Quick start
 
 ```bash
