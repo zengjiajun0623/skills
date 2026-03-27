@@ -1,7 +1,8 @@
 ---
 name: payroll
 description: Run recurring payroll cycles from an Elytro smart account. Supports ETH or a single ERC-20 token per pay period, manual approval, sponsorship-aware simulations, and logging best practices.
-user-invocable: true
+metadata:
+  user-invocable: true
 ---
 
 # Elytro Payroll Skill

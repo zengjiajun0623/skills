@@ -1,0 +1,54 @@
+name: Validate Skills
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate all skills (anthropics)
+        run: |
+          echo "===== anthropics validator ====="
+          exit_code=0
+          for dir in */; do
+            if [ -f "${dir}SKILL.md" ]; then
+              echo "  ${dir%/}: $(python scripts/anthropics_validate.py "$dir")"
+              if ! python scripts/anthropics_validate.py "$dir" > /dev/null 2>&1; then
+                exit_code=1
+              fi
+            fi
+          done
+          if [ $exit_code -ne 0 ]; then
+            echo "FAILED: anthropics validation"
+          fi
+          exit $exit_code
+
+      - name: Validate all skills (openclaw)
+        run: |
+          echo "===== openclaw validator ====="
+          exit_code=0
+          for dir in */; do
+            if [ -f "${dir}SKILL.md" ]; then
+              echo "  ${dir%/}: $(python scripts/openclaw_validate.py "$dir")"
+              if ! python scripts/openclaw_validate.py "$dir" > /dev/null 2>&1; then
+                exit_code=1
+              fi
+            fi
+          done
+          if [ $exit_code -ne 0 ]; then
+            echo "FAILED: openclaw validation"
+          fi
+          exit $exit_code

@@ -1,10 +1,11 @@
 ---
 name: defi
 description: Start-page skill that routes Elytro agents to the correct DeFi protocol playbook.
-user-invocable: true
-disable-model-invocation: false
 allowed-tools: []
-related-skills: ["elytro", "defi/elytro", "defi/uniswap"]
+metadata:
+  user-invocable: true
+  disable-model-invocation: false
+  related-skills: ["elytro", "defi/elytro", "defi/uniswap"]
 ---
 
 # Elytro DeFi Directory
