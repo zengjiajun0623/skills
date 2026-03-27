@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["**"]
 
+env:
+  ANTHROPICS_SCRIPT: https://raw.githubusercontent.com/anthropics/skills/main/skills/skill-creator/scripts/quick_validate.py
+  OPENCLAW_SCRIPT: https://raw.githubusercontent.com/openclaw/openclaw/main/skills/skill-creator/scripts/quick_validate.py
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -19,14 +23,22 @@ jobs:
       - name: Install dependencies
         run: pip install pyyaml
 
+      - name: Fetch validators from upstream
+        run: |
+          mkdir -p /tmp/validators
+          curl -fsSL "$ANTHROPICS_SCRIPT" -o /tmp/validators/anthropics_validate.py
+          curl -fsSL "$OPENCLAW_SCRIPT"   -o /tmp/validators/openclaw_validate.py
+          echo "Downloaded both validators from upstream."
+
       - name: Validate all skills (anthropics)
         run: |
           echo "===== anthropics validator ====="
           exit_code=0
           for dir in */; do
             if [ -f "${dir}SKILL.md" ]; then
-              echo "  ${dir%/}: $(python scripts/anthropics_validate.py "$dir")"
-              if ! python scripts/anthropics_validate.py "$dir" > /dev/null 2>&1; then
+              result=$(python /tmp/validators/anthropics_validate.py "$dir" 2>&1) || true
+              echo "  ${dir%/}: ${result}"
+              if echo "$result" | grep -qv "valid"; then
                 exit_code=1
               fi
             fi
@@ -42,8 +54,9 @@ jobs:
           exit_code=0
           for dir in */; do
             if [ -f "${dir}SKILL.md" ]; then
-              echo "  ${dir%/}: $(python scripts/openclaw_validate.py "$dir")"
-              if ! python scripts/openclaw_validate.py "$dir" > /dev/null 2>&1; then
+              result=$(python /tmp/validators/openclaw_validate.py "$dir" 2>&1) || true
+              echo "  ${dir%/}: ${result}"
+              if echo "$result" | grep -qv "valid"; then
                 exit_code=1
               fi
             fi
