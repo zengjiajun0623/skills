@@ -4,24 +4,24 @@ description: >
   Elytro smart-account wallet CLI for agents: multi-chain ERC-4337, 2FA email OTP, spending limits,
   social recovery. Simulate before send, get user approval on risky steps, and explain outcomes in a
   fixed, user-friendly format (no raw JSON unless asked). Deferred OTP completed with otp submit.
-  Use for: accounts, transfers, contract calls, email/security setup, guardian recovery. Requires Node 24 or later.
+  Use for: accounts, transfers, contract calls, email/security setup, guardian recovery. Node >= 24.
+version: 0.8.0
+homepage: https://elytro.com
 metadata:
-  version: 0.7.4
-  homepage: https://elytro.com
   openclaw:
     requires:
       bins:
         - elytro
-      node: ">=24.0.0"
-    emoji: "🔐"
+      node: '>=24.0.0'
+    emoji: '🔐'
     homepage: https://github.com/Elytro-eth/skills
-    os: ["macos", "windows", "linux"]
+    os: ['macos', 'windows', 'linux']
     install:
       - id: npm
         kind: npm
-        package: "@elytro/cli"
-        bins: ["elytro"]
-        label: "Install Elytro CLI (npm)"
+        package: '@elytro/cli'
+        bins: ['elytro']
+        label: 'Install Elytro CLI (npm)'
 ---
 
 # Elytro CLI -- Agent Skill
@@ -122,6 +122,41 @@ elytro delegation remove <id>                     # local only
 Other management: `delegation list`, `delegation show <id>`.
 
 Full workflow and troubleshooting: [docs/x402.md](docs/x402.md)
+
+## Token lookup
+
+Look up token addresses before using them in swap or transfer commands. Never guess a token address.
+
+```bash
+elytro token                           # all tokens on the current account's chain
+elytro token --search usdc             # search by symbol or name
+elytro token --chain 8453              # tokens on a specific chain
+```
+
+## Swap / Bridge
+
+Swap or bridge tokens across chains via LiFi. Always look up the token address with `elytro token` first, then quote, then send after user approval.
+
+```bash
+# Same-chain swap (from-chain defaults to account chain, to-chain defaults to from-chain)
+elytro swap quote --from-token 0x0000000000000000000000000000000000000000 \
+  --to-token 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
+  --amount 100000000000000
+
+# Cross-chain bridge (specify --to-chain for a different destination)
+elytro swap quote --to-chain 8453 \
+  --from-token 0x0000000000000000000000000000000000000000 \
+  --to-token 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
+  --amount 100000000000000
+
+# Execute (requires user approval, re-quotes internally)
+elytro swap send --to-chain 8453 \
+  --from-token 0x0000000000000000000000000000000000000000 \
+  --to-token 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
+  --amount 100000000000000
+```
+
+Token list source: [Uniswap default-token-list](https://github.com/Uniswap/default-token-list). Covers mainnet chains (1, 10, 42161, 8453). `--from-chain` defaults to the current account's chain. `--to-chain` defaults to `--from-chain` (same-chain swap). Use `0x0000000000000000000000000000000000000000` for native ETH. Amounts are in atomic units (wei). The `--slippage` option takes a percent value (e.g. `0.5` for 0.5%). `swap send` always fetches a fresh quote internally to avoid stale pricing.
 
 ## Social recovery
 
