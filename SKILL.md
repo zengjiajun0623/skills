@@ -25,6 +25,12 @@ Need to execute another protocol flow? Install that protocol’s folder (e.g., `
    - `defi/uniswap` (Uniswap AI planner prompts)  
      Once the planner produces calldata/UserOps, hand them to `defi/elytro`.
 
+## Loading Principle
+
+**Load only what you need now.** Start with `elytro` (always required) and the skill that matches the user's intent. If intent is vague or no protocol is specified, load `defi` to triage — do not pre-load protocol skills (e.g., `defi/uniswap`) until the intent is clear. Let each skill tell you what to load next.
+
+If the user names a protocol that has no skill folder yet (e.g., `defi/pendle/` does not exist), do not improvise — inform the user the protocol is not yet supported and suggest they open an issue on the repo to request it.
+
 ## Skill Map
 
 | Path            | Description                                                                 | Use Cases                                                                            |
