@@ -7,21 +7,21 @@ description: >
   Use for: accounts, transfers, contract calls, email/security setup, guardian recovery. Requires Node 18 or newer.
 metadata:
   openclaw:
-    version: 0.8.3
+    version: 0.8.9
     product-homepage: https://elytro.com
     requires:
       bins:
         - elytro
-      node: ">=18.0.0"
-    emoji: "🔐"
+      node: '>=18.0.0'
+    emoji: '🔐'
     homepage: https://github.com/Elytro-eth/skills
-    os: ["macos", "windows", "linux"]
+    os: ['macos', 'windows', 'linux']
     install:
       - id: npm
         kind: npm
-        package: "@elytro/cli"
-        bins: ["elytro"]
-        label: "Install Elytro CLI (npm)"
+        package: '@elytro/cli'
+        bins: ['elytro']
+        label: 'Install Elytro CLI (npm)'
 ---
 
 # Elytro CLI -- Agent Skill
@@ -180,7 +180,7 @@ elytro swap send --to-chain 8453 \
   --amount 100000000000000
 ```
 
-Token list source: [Uniswap default-token-list](https://github.com/Uniswap/default-token-list). Covers mainnet chains (1, 10, 42161, 8453). `--from-chain` defaults to the current account's chain. `--to-chain` defaults to `--from-chain` (same-chain swap). Use `0x0000000000000000000000000000000000000000` for native ETH. Amounts are in atomic units (wei). The `--slippage` option takes a percent value (e.g. `0.5` for 0.5%). `swap send` always fetches a fresh quote internally to avoid stale pricing.
+Token list source: [Uniswap default-token-list](https://github.com/Uniswap/default-token-list). Covers mainnet chains (1, 10, 137, 42161, 8453). `--from-chain` defaults to the current account's chain. `--to-chain` defaults to `--from-chain` (same-chain swap). Use `0x0000000000000000000000000000000000000000` for native ETH. Amounts are in atomic units (wei). The `--slippage` option takes a percent value (e.g. `0.5` for 0.5%). `swap send` always fetches a fresh quote internally to avoid stale pricing.
 
 ## Social recovery
 
