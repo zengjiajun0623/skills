@@ -11,6 +11,7 @@ A curated directory of Agent Skills that teach AI wallets how to coordinate Elyt
 | [`defi/SKILL.md`](./defi/SKILL.md)                 | DeFi directory that routes ambiguous intents to the right protocol skill.                                |
 | [`defi/elytro/SKILL.md`](./defi/elytro/SKILL.md)   | Execution bridge that runs planner calldata/UserOps through Elytro smart accounts.                       |
 | [`defi/uniswap/SKILL.md`](./defi/uniswap/SKILL.md) | Prompts and guardrails for using Uniswap AI to plan swaps/liquidity moves before handing them to Elytro. |
+| [`defi/polymarket/SKILL.md`](./defi/polymarket/SKILL.md) | Trade Polymarket prediction markets through scoped Elytro subkeys with bounded blast radius. |
 
 ## Installation
 

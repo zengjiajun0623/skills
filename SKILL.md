@@ -39,6 +39,7 @@ If the user names a protocol that has no skill folder yet (e.g., `defi/pendle/` 
 | `defi/`         | Directory skill that triages DeFi intents and links to protocol sub-skills. | When a user simply says “do DeFi” or hasn’t picked a protocol yet.                   |
 | `defi/elytro/`  | Execution bridge from planner calldata/UserOps into Elytro smart accounts.  | Running Uniswap AI instructions, relaying calldata, simulating & sending tx/UserOps. |
 | `defi/uniswap/` | Uniswap AI planning prompts and guardrails.                                 | Swaps, LP adds/removes, Uniswap analytics before execution.                          |
+| `defi/polymarket/` | Polymarket CLOB trading through scoped Elytro subkeys.                   | Prediction-market trades with bounded blast radius — subkey holds the trading budget, owner key never signs CLOB orders. |
 | `payroll/`      | Payroll runbook for Elytro smart accounts.                                  | Recurring ETH/USDC payouts with manual approval every pay period.                    |
 
 Add more folders under `defi/` (`defi/<protocol>/SKILL.md`) to extend the pack; the directory skill will automatically link to them once documented.
@@ -54,6 +55,9 @@ npx skills add Elytro-eth/skills --skill elytro
 
 # Uniswap planner only
 npx skills add Elytro-eth/skills --skill defi/uniswap
+
+# Polymarket prediction-market trading only
+npx skills add Elytro-eth/skills --skill defi/polymarket
 ```
 
 Clawhub users can add the repo once, then enable whichever folders are needed per workspace. No repackaging required; Clawhub preserves the `<folder>/SKILL.md` layout.

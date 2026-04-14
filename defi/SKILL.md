@@ -23,6 +23,7 @@ Load this skill whenever a user asks for "DeFi" without specifying a protocol. I
 | Goal | Recommended Skill | Why |
 | --- | --- | --- |
 | Swap tokens, add/remove Uniswap liquidity | `defi/uniswap` | Uses the Uniswap AI planner to draft calldata/UserOps for Elytro execution. |
+| Trade Polymarket prediction markets (BUY/SELL/close positions) | `defi/polymarket` | Scoped-subkey pattern: the smart-account owner key never signs CLOB orders. Includes buy/sell/sweep workflow with bounded blast radius. |
 | Relay calldata/UserOp output from any planner | `defi/elytro` | Base workflow once a planner produced calldata or a UserOperation. |
 | Wallet orchestration & inline buttons | `elytro` | Mandatory UX rules + Elytro CLI commands. |
 | Need another protocol? | Open an issue | File a request describing the desired protocol and workflow; we'll add another skill. |
